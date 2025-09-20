@@ -853,10 +853,10 @@
       // Mensagem formatada para WhatsApp
       // INSTRUÇÕES PARA TROCAR A CHAVE PIX:  Substitua 00000000000 pela chave Pix do cliente
       const mensagem = `Olá, gostaria de pedir:\n${lista}\nTotal: R$${total.toFixed(2)}\n\nNome: ${nome}\nEndereço: ${endereco}` +        
-                      `\n\nPara finalisar sua compra informe abaixo: +
+                      `\n\nPara finalisar sua compra informe abaixo: `+
                       `\n\nForma de Pagamento: [Dinheiro, Pix, Crédito ou Débito]` +                  
                       `\nTroco para: `+
-                      `\n\nSe for no pix, nos envie o comprovante, por favor. +
+                      `\n\nSe for no pix, nos envie o comprovante, por favor.` +
                       `\nChave Pix: 00000000000`;
       const url = `https://wa.me/${telefoneWhatsApp}?text=${encodeURIComponent(mensagem)}`;
       
