@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FarmaVida - Catálogo de Medicamentos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  
+  <style>
+    /* ==================================================================== */
+    /* ZONA DE CONFIGURAÇÃO: VARIÁVEIS DE CORES E ESTILOS GERAIS */
+    /* ==================================================================== */
+
+    /* ATENÇÃO: Altere estas cores para personalizar para cada cliente */
+    :root {
+      --primary: #2a7de1;       /* Cor principal: Mude para a cor da farmácia (ex: #008080 para verde) */
+      --secondary: #4CAF50;     /* Cor secundária (botões de sucesso) */
+      --accent: #ff6b6b;        /* Cor de destaque (ações negativas) */
+      --light: #f8f9fa;         /* Cor de fundo clara */
+      --dark: #343a40;          /* Cor para texto escuro */
+      --gray: #6c757d;          /* Cor para texto cinza */
+      --border: #dee2e6;        /* Cor para bordas */
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background-color: #f5f7fb;
+      padding-bottom: 40px;
+      margin: 0;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+    
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, #1a5cb0 100%);
+      color: white;
+      padding: 15px 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    /* Logo personalizável - IMPORTANTE PARA CADA CLIENTE */
+    .logo { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+    }
+    .logo-img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      /* PARA TROCAR A LOGO: substitua a URL abaixo pelo caminho da logo do cliente */
+      background: url('https://i.postimg.cc/Pr0HbsfC/Gemini-Generated-Image-nbnrxnnbnrxnnbnr-removebg-preview.png') no-repeat center;
+      background-size: contain;
+    }
+    .logo h1 { 
+      font-size: 20px; 
+      font-weight: 600; 
+      margin: 0;
+    }
+    
+    .cart-icon { 
+      position: relative; 
+      font-size: 22px; 
+      cursor: pointer; 
+    }
+    .cart-count { 
+      position: absolute; 
+      top: -8px; 
+      right: -8px; 
+      background-color: var(--accent); 
+      color: white; 
+      border-radius: 50%; 
+      width: 20px; 
+      height: 20px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 12px; 
+      font-weight: bold; 
+    }
+    
+    .search-sort-container { 
+      display: flex; 
+      flex-direction: column;
+      gap: 15px; 
+      margin: 20px 0; 
+    }
+    #campoBusca { 
+      width: 100%; 
+      padding: 12px 15px; 
+      border: 1px solid var(--border); 
+      border-radius: 8px; 
+      font-size: 16px; 
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); 
+    }
+    .sort-options { 
+      display: flex; 
+      gap: 10px; 
+      align-items: center; 
+      flex-wrap: wrap;
+    }
+    select { 
+      padding: 10px 15px; 
+      border: 1px solid var(--border); 
+      border-radius: 8px; 
+      background-color: white; 
+      font-size: 14px; 
+      cursor: pointer; 
+      flex-grow: 1;
+    }
+    
+    #catalogo { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
+      gap: 15px; 
+      margin-bottom: 30px; 
+    }
+    .produto { 
+      background: white; 
+      border-radius: 12px; 
+      padding: 15px; 
+      text-align: center; 
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08); 
+      transition: transform 0.3s, box-shadow 0.3s; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between; 
+    }
+    .produto:hover { 
+      transform: translateY(-5px); 
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); 
+    }
+    .produto.escondido { 
+      display: none; 
+    }
+    .produto img { 
+      max-width: 80px; 
+      height: 80px; 
+      object-fit: contain; 
+      margin: 0 auto 10px; 
+      display: block; 
+    }
+    .produto h3 { 
+      font-size: 14px; 
+      margin-bottom: 8px; 
+      color: var(--dark); 
+      min-height: 40px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+    }
+    .produto .preco { 
+      font-size: 16px; 
+      font-weight: bold; 
+      color: var(--primary); 
+      margin-bottom: 10px; 
+    }
+    .quantity-control { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px; 
+      margin-bottom: 10px; 
+    }
+    .quantity-btn { 
+      width: 28px; 
+      height: 28px; 
+      border: none; 
+      border-radius: 50%; 
+      background-color: var(--primary); 
+      color: white; 
+      font-weight: bold; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      transition: background-color 0.2s; 
+    }
+    .quantity-btn:hover { 
+      background-color: #1a5cb0; 
+    }
+    .quantity-input { 
+      width: 40px; 
+      text-align: center; 
+      padding: 5px; 
+      border: 1px solid var(--border); 
+      border-radius: 5px; 
+      font-size: 14px; 
+    }
+    .add-cart-btn { 
+      background-color: var(--secondary); 
+      color: white; 
+      border: none; 
+      border-radius: 6px; 
+      padding: 8px 10px; 
+      font-size: 13px; 
+      cursor: pointer; 
+      transition: background-color 0.2s; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 5px; 
+    }
+    .add-cart-btn:hover { 
+      background-color: #3d8e40; 
+    }
+    
+    /* Carrinho lateral para mobile */
+    .cart-sidebar { 
+      position: fixed; 
+      top: 0; 
+      right: -100%; 
+      width: 100%; 
+      height: 100vh; 
+      background: white; 
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1); 
+      z-index: 1000; 
+      transition: right 0.3s ease; 
+      display: flex; 
+      flex-direction: column; 
+    }
+    .cart-sidebar.open { 
+      right: 0; 
+    }
+    .cart-header { 
+      padding: 15px; 
+      border-bottom: 1px solid var(--border); 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      background: var(--primary); 
+      color: white; 
+    }
+    .close-cart { 
+      background: none; 
+      border: none; 
+      color: white; 
+      font-size: 20px; 
+      cursor: pointer; 
+    }
+    .cart-items { 
+      flex: 1; 
+      overflow-y: auto; 
+      padding: 15px; 
+    }
+    .cart-item { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 10px 0; 
+      border-bottom: 1px solid var(--border); 
+    }
+    .cart-item-info { 
+      flex: 1; 
+    }
+    .cart-item-name { 
+      font-weight: 500; 
+      font-size: 14px;
+    }
+    .cart-item-price { 
+      color: var(--primary); 
+      font-weight: bold; 
+      font-size: 14px;
+    }
+    .cart-item-quantity { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+    }
+    .cart-total { 
+      padding: 15px; 
+      border-top: 1px solid var(--border); 
+      font-size: 18px; 
+      font-weight: bold; 
+      display: flex; 
+      justify-content: space-between; 
+      background: var(--light); 
+    }
+    .cart-actions { 
+      padding: 15px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+    }
+    .checkout-btn { 
+      background-color: var(--secondary); 
+      color: white; 
+      border: none; 
+      border-radius: 6px; 
+      padding: 12px; 
+      font-size: 16px; 
+      font-weight: bold; 
+      cursor: pointer; 
+      transition: background-color 0.2s; 
+      width: 100%; 
+    }
+    .checkout-btn:hover { 
+      background-color: #3d8e40; 
+    }
+    .clear-cart-btn { 
+      background-color: transparent; 
+      color: var(--gray); 
+      border: 1px solid var(--border); 
+      border-radius: 6px; 
+      padding: 10px; 
+      font-size: 14px; 
+      cursor: pointer; 
+      transition: background-color 0.2s; 
+    }
+    .clear-cart-btn:hover { 
+      background-color: #f8f9fa; 
+    }
+    
+    .overlay { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0, 0, 0, 0.5); 
+      z-index: 999; 
+      display: none; 
+    }
+    .overlay.active { 
+      display: block; 
+    }
+    
+    .formulario { 
+      background: white; 
+      border-radius: 12px; 
+      padding: 20px; 
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08); 
+      margin-top: 30px; 
+    }
+    .form-title { 
+      margin-bottom: 15px; 
+      color: var(--primary); 
+      font-size: 18px; 
+    }
+    .form-group { 
+      margin-bottom: 15px; 
+    }
+    .form-group label { 
+      display: block; 
+      margin-bottom: 8px; 
+      font-weight: 500; 
+    }
+    .form-group input { 
+      width: 100%; 
+      padding: 12px 15px; 
+      border: 1px solid var(--border); 
+      border-radius: 8px; 
+      font-size: 16px; 
+    }
+    .finalizar-btn { 
+      background-color: var(--primary); 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      padding: 15px; 
+      font-size: 16px; 
+      font-weight: bold; 
+      cursor: pointer; 
+      transition: background-color 0.2s; 
+      width: 100%; 
+    }
+    .finalizar-btn:hover { 
+      background-color: #1a5cb0; 
+    }
+    
+    .empty-cart-message { 
+      text-align: center; 
+      padding: 30px; 
+      color: var(--gray); 
+    }
+    
+    .toast { 
+      position: fixed; 
+      bottom: 20px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      background-color: var(--dark); 
+      color: white; 
+      padding: 12px 20px; 
+      border-radius: 8px; 
+      z-index: 1001; 
+      opacity: 0; 
+      transition: opacity 0.3s; 
+      max-width: 80%;
+      text-align: center;
+    }
+    .toast.show { 
+      opacity: 1; 
+    }
+    
+    .loading { 
+      text-align: center; 
+      padding: 20px; 
+      color: var(--gray); 
+      grid-column: 1 / -1;
+    }
+    
+    /* Header fixo para mobile */
+    .header-content { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+    }
+    
+    /* Melhorias para mobile */
+    @media (max-width: 480px) {
+      #catalogo {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      
+      .produto {
+        padding: 10px;
+      }
+      
+      .produto h3 {
+        font-size: 13px;
+        min-height: 36px;
+      }
+      
+      .logo h1 {
+        font-size: 18px;
+      }
+    }
+    .whatsapp-contact {
+      
+      color: rgb(10, 10, 10);
+      text-align: center;
+      padding: auto;
+     
+    }
+
+    @media (min-width: 481px) and (max-width: 768px) {
+      #catalogo {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay" id="overlay"></div>
+
+  <header>
+    <div class="container header-content">
+      <div class="logo">
+        <!-- 
+          ===============================================================
+          IMPORTANTE: PARA TROCAR A LOGO PARA CADA CLIENTE
+          ===============================================================
+          1. Substitua a URL dentro de background-url no CSS pela logo do cliente
+          2. OU descomente a linha abaixo e comente a div .logo-img
+          3. Altere o alt para o nome da farmácia
+        -->
+        <div class="logo-img"></div>
+        <!-- <img src="https://via.placeholder.com/40x40/ffffff/2a7de1?text=Logo" alt="FarmaVida" class="logo-img"> -->
+        <h1>FarmaVida</h1>
+      </div>
+      <div class="cart-icon" id="cartIcon">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-count" id="cartCount">0</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="search-sort-container">
+      <input type="text" id="campoBusca" placeholder="Pesquisar remédios..." oninput="filtrarProdutos()">
+      
+      <div class="sort-options">
+        <label for="sortSelect">Ordenar por:</label>
+        <select id="sortSelect" onchange="ordenarProdutos()">
+          <option value="nome">Nome (A-Z)</option>
+          <option value="precoAsc">Preço (Menor para Maior)</option>
+          <option value="precoDesc">Preço (Maior para Menor)</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="catalogo">
+      <div class="loading">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Carregando produtos...</p>
+      </div>
+    </div>
+
+    <div class="formulario">
+      <h2 class="form-title">Informações para Entrega</h2>
+      <div class="form-group">
+        <label for="nome">Nome Completo</label>
+        <input type="text" id="nome" placeholder="Seu nome completo">
+      </div>
+      <div class="form-group">
+        <label for="endereco">Endereço de Entrega</label>
+        <input type="text" id="endereco" placeholder="Seu endereço completo">
+      </div>
+      <button class="finalizar-btn" onclick="finalizarPedido()">Finalizar Pedido</button>
+    </div>
+  </div>
+
+  <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h2>Seu Carrinho</h2>
+      <button class="close-cart" onclick="toggleCart()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <div class="empty-cart-message">
+        <i class="fas fa-shopping-cart" style="font-size: 40px; margin-bottom: 15px;"></i>
+        <p>Seu carrinho está vazio</p>
+      </div>
+    </div>
+    <div class="cart-total">
+      <span>Total:</span>
+      <span id="cartTotal">R$ 0,00</span>
+    </div>
+    <div class="cart-actions">
+      <button class="checkout-btn" onclick="finalizarPedido()">Finalizar Compra</button>
+      <button class="clear-cart-btn" onclick="limparCarrinho()">Limpar Carrinho</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="whatsapp-contact"> Se você não encontrou o que procurava, entre em contato conosco pelo WhatsApp: <a href="https://wa.me/5585989408154">5585989408154</a></div>
+
+  <script>
+    // ====================================================================
+    // ZONA DE MANUTENÇÃO: VARIÁVEIS E FUNÇÕES PRINCIPAIS
+    // ====================================================================
+    
+    // =============================
+    // 1. LISTA DE PRODUTOS (FALLBACK)
+    // =============================
+    /**
+     * Array de fallback caso a API não esteja disponível.
+     * ATUALIZE com produtos genéricos ou remova se sempre usar API.
+     */
+    const produtosFallback = [
+      { id: 1, nome: "Dipirona", preco: 20, img: "https://i.postimg.cc/xTVDqG6m/1.png" },
+      { id: 2, nome: "Amoxicilina", preco: 35, img: "https://i.postimg.cc/hPt0VsKw/2.png" },
+      { id: 3, nome: "Omeprazol", preco: 50, img: "https://i.postimg.cc/VvLXBsPM/3.png" },
+      { id: 4, nome: "Ibuprofeno", preco: 25, img: "https://i.postimg.cc/Kjzg39tD/4.png" },
+      { id: 5, nome: "Cloridrato de Cetirizina", preco: 40, img: "https://i.postimg.cc/5yhN9pg0/5.png" },
+      { id: 6, nome: "Paracetamol", preco: 15, img: "https://i.postimg.cc/VvLXBsPM/3.png" },
+      { id: 7, nome: "Loratadina", preco: 18, img: "https://i.postimg.cc/Kjzg39tD/4.png" },
+      { id: 8, nome: "Sinvastatina", preco: 45, img: "https://i.postimg.cc/5yhN9pg0/5.png" }
+    ];
+    
+    // Variável global para armazenar produtos
+    let produtos = [];
+    
+    // =============================
+    // 2. CONFIGURAÇÕES DA API/INTEGRAÇÃO
+    // =============================
+    /**
+     * CONFIGURE: URL da API do sistema da farmácia
+     * Substitua pela URL real da API que fornece os produtos
+     */
+    const API_URL = 'https://sistema-da-farmacia.com/api/produtos';
+    
+    /**
+     * CONFIGURE: Token de autenticação se necessário
+     * Alguns sistemas exigem autenticação via token
+     */
+    const API_TOKEN = 'token_de_autenticacao_aqui';
+    
+    // =============================
+    // 3. DADOS DE CONTATO
+    // =============================
+    /**
+     * ALTERE: Número do WhatsApp para o qual o pedido será enviado.
+     * Formato: 55DDDNUMERO (sem espaços ou caracteres especiais)
+     */
+    const telefoneWhatsApp = "5585989408154"; 
+    
+    // ====================================================================
+    // ZONA DE CÓDIGO FUNCIONAL: NÃO PRECISA DE ALTERAÇÃO FREQUENTE
+    // ====================================================================
+    
+    // Variáveis e funções do carrinho
+    let carrinho = [];
+    const catalogo = document.getElementById("catalogo");
+    const cartCount = document.getElementById("cartCount");
+    const cartItems = document.getElementById("cartItems");
+    const cartTotal = document.getElementById("cartTotal");
+    const cartSidebar = document.getElementById("cartSidebar");
+    const overlay = document.getElementById("overlay");
+    const toast = document.getElementById("toast");
+    
+    // =============================
+    // 4. FUNÇÃO DE INTEGRAÇÃO COM SISTEMA DA FARMÁCIA
+    // =============================
+    /**
+     * FUNÇÃO PRINCIPAL: Carrega produtos do sistema da farmácia
+     * Esta função faz uma requisição para a API configurada acima
+     * Você precisará adaptar o mapeamento conforme a estrutura da API
+     */
+    async function carregarProdutosDoSistema() {
+      try {
+        // Configuração da requisição
+        const opcoesRequisicao = {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            // Adicione headers de autenticação se necessário:
+            // 'Authorization': `Bearer ${API_TOKEN}`
+          }
+        };
+        
+        const response = await fetch(API_URL, opcoesRequisicao);
+        
+        if (!response.ok) {
+          throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
+        }
+        
+        const dados = await response.json();
+        
+        // Mapeamento dos dados da API para o formato esperado
+        // AJUSTE ESTE MAPEAMENTO conforme a estrutura da API do cliente
+        produtos = dados.map(item => ({
+          id: item.id || item.codigo,           // Ajuste conforme a API
+          nome: item.nome || item.descricao,    // Ajuste conforme a API
+          preco: item.preco || item.valor,       // Ajuste conforme a API
+          img: item.imagem || item.url_imagem || `https://via.placeholder.com/100?text=${encodeURIComponent(item.nome || item.descricao)}`
+        }));
+        
+        renderizarProdutos();
+        
+      } catch (error) {
+        console.error("Falha na integração com o sistema:", error);
+        
+        // Usa dados de fallback em caso de erro
+        produtos = produtosFallback;
+        renderizarProdutos();
+        
+        showToast("Não foi possível carregar os produtos do sistema. Usando catálogo local.");
+      }
+    }
+    
+    function renderizarProdutos(produtosArray = produtos) {
+      // Limpa mensagem de carregamento
+      catalogo.innerHTML = '';
+      
+      if (produtosArray.length === 0) {
+        catalogo.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+            <i class="fas fa-box-open" style="font-size: 50px; color: var(--gray); margin-bottom: 15px;"></i>
+            <h3>Nenhum produto encontrado</h3>
+            <p>Não há produtos disponíveis no momento.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      produtosArray.forEach((p, i) => {
+        const produtoDiv = document.createElement("div");
+        produtoDiv.className = "produto";
+        produtoDiv.innerHTML = `
+          <img src="${p.img}" alt="${p.nome}" onerror="this.src='https://via.placeholder.com/100?text=Produto'">
+          <h3>${p.nome}</h3>
+          <div class="preco">R$ ${p.preco.toFixed(2)}</div>
+          <div class="quantity-control">
+            <button class="quantity-btn" onclick="alterarQuantidade(${i}, -1)">-</button>
+            <input type="number" class="quantity-input" id="qtd-${i}" min="0" value="0" onchange="atualizarQuantidadeInput(${i})">
+            <button class="quantity-btn" onclick="alterarQuantidade(${i}, 1)">+</button>
+          </div>
+          <button class="add-cart-btn" onclick="adicionarAoCarrinho(${i})">
+            <i class="fas fa-cart-plus"></i> Adicionar
+          </button>`;
+        catalogo.appendChild(produtoDiv);
+      });
+    }
+    
+    function filtrarProdutos() {
+      const termoBusca = document.getElementById("campoBusca").value.toLowerCase();
+      const produtosFiltrados = produtos.filter(p => 
+        p.nome.toLowerCase().includes(termoBusca)
+      );
+      renderizarProdutos(produtosFiltrados);
+    }
+    
+    function ordenarProdutos() {
+      const criterio = document.getElementById("sortSelect").value;
+      let produtosOrdenados = [...produtos];
+      
+      switch(criterio) {
+        case 'nome':
+          produtosOrdenados.sort((a, b) => a.nome.localeCompare(b.nome));
+          break;
+        case 'precoAsc':
+          produtosOrdenados.sort((a, b) => a.preco - b.preco);
+          break;
+        case 'precoDesc':
+          produtosOrdenados.sort((a, b) => b.preco - a.preco);
+          break;
+      }
+      
+      renderizarProdutos(produtosOrdenados);
+    }
+    
+    function alterarQuantidade(index, change) {
+      const input = document.getElementById(`qtd-${index}`);
+      let newValue = parseInt(input.value) + change;
+      if (newValue < 0) newValue = 0;
+      input.value = newValue;
+    }
+    
+    function atualizarQuantidadeInput(index) {
+      const input = document.getElementById(`qtd-${index}`);
+      if (input.value < 0) input.value = 0;
+    }
+    
+    function adicionarAoCarrinho(index) {
+      const input = document.getElementById(`qtd-${index}`);
+      const quantidade = parseInt(input.value);
+      
+      if (quantidade <= 0) {
+        showToast("Selecione pelo menos 1 item");
+        return;
+      }
+      
+      const produto = produtos[index];
+      const itemExistente = carrinho.find(item => item.id === produto.id);
+      
+      if (itemExistente) {
+        itemExistente.quantidade += quantidade;
+      } else {
+        carrinho.push({ 
+          id: produto.id, 
+          nome: produto.nome, 
+          preco: produto.preco, 
+          quantidade: quantidade, 
+          img: produto.img 
+        });
+      }
+      
+      input.value = 0;
+      atualizarCarrinho();
+      showToast(`${quantidade} ${produto.nome} adicionado(s) ao carrinho`);
+    }
+    
+    function atualizarCarrinho() {
+      cartCount.textContent = carrinho.reduce((total, item) => total + item.quantidade, 0);
+      
+      if (carrinho.length === 0) {
+        cartItems.innerHTML = `
+          <div class="empty-cart-message">
+            <i class="fas fa-shopping-cart" style="font-size: 40px; margin-bottom: 15px;"></i>
+            <p>Seu carrinho está vazio</p>
+          </div>`;
+        cartTotal.textContent = "R$ 0,00";
+        return;
+      }
+      
+      let itemsHTML = '';
+      let total = 0;
+      
+      carrinho.forEach((item, index) => {
+        const subtotal = item.preco * item.quantidade;
+        total += subtotal;
+        
+        itemsHTML += `
+          <div class="cart-item">
+            <div class="cart-item-info">
+              <div class="cart-item-name">${item.nome}</div>
+              <div class="cart-item-price">R$ ${item.preco.toFixed(2)}</div>
+            </div>
+            <div class="cart-item-quantity">
+              <button class="quantity-btn" onclick="alterarQuantidadeCarrinho(${index}, -1)">-</button>
+              <span>${item.quantidade}</span>
+              <button class="quantity-btn" onclick="alterarQuantidadeCarrinho(${index}, 1)">+</button>
+            </div>
+            <button class="quantity-btn" style="background: var(--accent)" onclick="removerDoCarrinho(${index})">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>`;
+      });
+      
+      cartItems.innerHTML = itemsHTML;
+      cartTotal.textContent = `R$ ${total.toFixed(2)}`;
+    }
+    
+    function alterarQuantidadeCarrinho(index, change) {
+      carrinho[index].quantidade += change;
+      
+      if (carrinho[index].quantidade <= 0) {
+        carrinho.splice(index, 1);
+      }
+      
+      atualizarCarrinho();
+    }
+    
+    function removerDoCarrinho(index) {
+      carrinho.splice(index, 1);
+      atualizarCarrinho();
+      showToast("Item removido do carrinho");
+    }
+    
+    function limparCarrinho() {
+      carrinho = [];
+      atualizarCarrinho();
+      showToast("Carrinho esvaziado");
+    }
+    
+    function toggleCart() {
+      cartSidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    }
+    
+    function finalizarPedido() {
+      if (carrinho.length === 0) {
+        showToast("Seu carrinho está vazio");
+        return;
+      }
+      
+      const nome = document.getElementById("nome").value.trim();
+      const endereco = document.getElementById("endereco").value.trim();
+      
+      if (!nome || !endereco) {
+        showToast("Por favor, preencha seu nome e endereço");
+        return;
+      }
+      
+      let total = 0;
+      let lista = "";
+      
+      carrinho.forEach(item => {
+        const subtotal = item.quantidade * item.preco;
+        total += subtotal;
+        lista += `- ${item.nome} x${item.quantidade} (R$${subtotal.toFixed(2)})\n`;
+      });
+      // Mensagem formatada para WhatsApp
+      // INSTRUÇÕES PARA TROCAR A CHAVE PIX:  Substitua 00000000000 pela chave Pix do cliente
+      const mensagem = `Olá, gostaria de pedir:\n${lista}\nTotal: R$${total.toFixed(2)}\n\nNome: ${nome}\nEndereço: ${endereco}` +
+                      `\n\nForma de Pagamento: [Dinheiro, Pix, Crédito ou Débito]` +
+                      `\nChave Pix: 00000000000` +
+                      `\nTroco para: [informe o valor se precisar de troco]`;
+      const url = `https://wa.me/${telefoneWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+      
+      window.open(url, "_blank");
+      limparCarrinho();
+      document.getElementById("nome").value = "";
+      document.getElementById("endereco").value = "";
+      
+      if (cartSidebar.classList.contains('open')) {
+        toggleCart();
+      }
+    }
+    
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+    
+    // Event listeners
+    document.getElementById('cartIcon').addEventListener('click', toggleCart);
+    overlay.addEventListener('click', toggleCart);
+    
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', function() {
+      // COMENTE/DESCOMENTE conforme a necessidade do cliente:
+      
+      // Opção 1: Para clientes COM sistema integrado
+      carregarProdutosDoSistema();
+      
+      // Opção 2: Para clientes SEM sistema integrado (usar produtos fixos)
+      // produtos = produtosFallback;
+      // renderizarProdutos();
+    });
+  </script>
+
+</body>
+</html>
+
+
